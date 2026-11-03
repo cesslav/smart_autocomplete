@@ -1,0 +1,126 @@
+{
+  "name": "smart-autocomplete",
+  "displayName": "Smart Autocomplete (Local LLM)",
+  "description": "Statistics-aware smart autocomplete: filters a local dictionary of identifiers, then ranks candidates with a small local LLM (Ollama / OpenAI-compatible).",
+  "version": "0.1.2",
+  "publisher": "local",
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Snippets"
+  ],
+  "keywords": [
+    "autocomplete",
+    "completion",
+    "llm",
+    "ollama",
+    "local"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "smartAutocomplete.rescan",
+        "title": "Smart Autocomplete: Rescan workspace"
+      },
+      {
+        "command": "smartAutocomplete.showStats",
+        "title": "Smart Autocomplete: Show identifier statistics"
+      },
+      {
+        "command": "smartAutocomplete.resetUsage",
+        "title": "Smart Autocomplete: Reset usage statistics"
+      }
+    ],
+    "configuration": {
+      "title": "Smart Autocomplete",
+      "properties": {
+        "smartAutocomplete.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable smart autocomplete."
+        },
+        "smartAutocomplete.debounceMs": {
+          "type": "number",
+          "default": 300,
+          "description": "Delay (ms) after the last keystroke before candidates are filtered and the local LLM is queried."
+        },
+        "smartAutocomplete.llmTimeoutMs": {
+          "type": "number",
+          "default": 2500,
+          "description": "Maximum time (ms) to wait for the local LLM. On timeout, frequency-ranked candidates are shown."
+        },
+        "smartAutocomplete.backend": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "openai"
+          ],
+          "default": "ollama",
+          "description": "Local LLM backend. 'ollama' uses /api/generate, 'openai' uses /v1/chat/completions."
+        },
+        "smartAutocomplete.llmUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Base URL of the local LLM server."
+        },
+        "smartAutocomplete.llmModel": {
+          "type": "string",
+          "default": "qwen2.5-coder:1.5b",
+          "description": "Model name on the local server (e.g. qwen2.5-coder:1.5b, gemma2:2b, phi3.5:3.8b)."
+        },
+        "smartAutocomplete.maxCandidates": {
+          "type": "number",
+          "default": 30,
+          "description": "How many prefix-filtered dictionary entries are sent to the LLM (top-N by usage score)."
+        },
+        "smartAutocomplete.topN": {
+          "type": "number",
+          "default": 5,
+          "description": "How many completions to ask the LLM to return."
+        },
+        "smartAutocomplete.contextLines": {
+          "type": "number",
+          "default": 8,
+          "description": "How many lines of code above the cursor are sent to the LLM as context."
+        },
+        "smartAutocomplete.mode": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "widget"
+          ],
+          "default": "inline",
+          "description": "How completions are shown. 'inline' (default) — hybrid: the best candidate is ghost text (Tab accepts, Alt+]/Alt+[ cycles) and the remaining candidates open in the regular suggest dropdown; 'widget' — the whole ranked list in the dropdown, no ghost text."
+        },
+        "smartAutocomplete.suppressBuiltInSuggest": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically set editor.quickSuggestions=false (global setting) so no suggest dropdown auto-pops while typing — only the ghost text appears, the dropdown is available via Ctrl+Space. The previous value is restored when the plugin or inline mode is disabled. Default false: the dropdown with the remaining candidates auto-pops together with the ghost text."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npm run compile && vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.82.0",
+    "@vscode/vsce": "2.24.0",
+    "typescript": "^5.4.0"
+  },
+  "overrides": {
+    "undici": "6.21.0"
+  }
+}
